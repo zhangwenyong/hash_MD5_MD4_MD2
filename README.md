@@ -171,5 +171,94 @@ return 0;
 ```
 
 
+### HMac
+
+HMac是密钥相关的哈希算法 。和之前的算法不同之处在于一个密钥，才能生成输出 。 主要是基于签名散列算法。可以认为散列算法 加入了加密逻辑 所以相比 SHA 算法更难破解 包含下面的算法
+
+```
+/*!
+@enum       CCHmacAlgorithm
+@abstract   Algorithms implemented in this module.
+
+@constant   kCCHmacAlgSHA1      HMAC with SHA1 digest
+@constant   kCCHmacAlgMD5       HMAC with MD5 digest
+@constant   kCCHmacAlgSHA256    HMAC with SHA256 digest
+@constant   kCCHmacAlgSHA384    HMAC with SHA384 digest
+@constant   kCCHmacAlgSHA512    HMAC with SHA512 digest
+@constant   kCCHmacAlgSHA224    HMAC with SHA224 digest
+*/
+enum {
+kCCHmacAlgSHA1,
+kCCHmacAlgMD5,
+kCCHmacAlgSHA256,
+kCCHmacAlgSHA384,
+kCCHmacAlgSHA512,
+kCCHmacAlgSHA224
+};
+```
+HMac的应用场景是
+* 1 密钥的散列存储 因为需要散列的时候 需要密码实际相当于算法里面加了盐  使用的密码 要随机 和用户相关
+* 2 用于数据签名 双方使用相同的密钥 。然后做签名验证 密钥可以固化 也可以 再在回话前协商。
+
+
+总结
+
+
+* 1密码保存和传输需要做散列处理。但是散列算法主要是脱敏，不能替代加密算法。
+* 2 如今常用的Md5算法和SHA1算法都不再安全。所以推荐使用SHA-2相关算法。
+* 3散列算法应该加入盐值即：result=HASH(password+salt)。其中盐值应该是随机字符串且每个用户不一样。
+* 4 HMac引入了秘钥的概念，如果不知道秘钥，秘钥不同，散列值也不同，相当于散列算法加入了盐值。可以把它当做更安全的散列算法使用。
+
+```
+// HMac 是密钥相关的哈希算法。
+/**
+相关的方法在CommonHMac.h 这个头文件里面
+
+*/
+void HMac_MD5(NSData *data,NSString *key)
+{
+
+unsigned char resulet[CC_MD5_DIGEST_LENGTH];
+
+
+
+CCHmac(kCCHmacAlgMD5, key.UTF8String, (size_t)key.length, data.bytes, (size_t)data.length, resulet);
+
+
+NSString *resultStr = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",resulet[0],resulet[1],resulet[2],resulet[3],resulet[4],resulet[5],resulet[6],resulet[7],resulet[8],resulet[9],resulet[10],resulet[11],resulet[12],resulet[13],resulet[14],resulet[15]];
+
+NSLog(@"===HMac_MD5===%@======",resultStr);
+
+}
+
+//第二种Hmac 的方法
+void HMac_MD5_2(NSData *data,NSString *key)
+{
+
+
+
+unsigned char resulet[CC_MD5_DIGEST_LENGTH];
+
+
+
+CCHmacContext contex;
+
+CCHmacInit(&contex, kCCHmacAlgMD5, key.UTF8String, (size_t)key.length);
+
+CCHmacUpdate(&contex, data.bytes, (size_t)data.length);
+
+CCHmacFinal(&contex, resulet);
+
+
+NSString *resultStr = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",resulet[0],resulet[1],resulet[2],resulet[3],resulet[4],resulet[5],resulet[6],resulet[7],resulet[8],resulet[9],resulet[10],resulet[11],resulet[12],resulet[13],resulet[14],resulet[15]];
+
+NSLog(@"===HMac_MD5_2===%@======",resultStr);
+
+
+}
+
+```
+
+
 
 

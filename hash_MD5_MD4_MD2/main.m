@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CommonCrypto/CommonDigest.h>
 
+#import <CommonCrypto/CommonHMAC.h>
 
 
 /**
@@ -30,7 +31,7 @@
     // 02。是不满两位补齐 0
     NSString *resultStr = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",resulet[0],resulet[1],resulet[2],resulet[3],resulet[4],resulet[5],resulet[6],resulet[7],resulet[8],resulet[9],resulet[10],resulet[11],resulet[12],resulet[13],resulet[14],resulet[15]];
    
-    NSLog(@"-----%@-----",resultStr);
+    NSLog(@"-MD_2----%@-----",resultStr);
     
 }
 
@@ -52,9 +53,57 @@ void MD_2fen(NSData *data)
     
     NSString *resultStr = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",resulet[0],resulet[1],resulet[2],resulet[3],resulet[4],resulet[5],resulet[6],resulet[7],resulet[8],resulet[9],resulet[10],resulet[11],resulet[12],resulet[13],resulet[14],resulet[15]];
     
-    NSLog(@"======%@======",resultStr);
+    NSLog(@"====MD_2fen==%@======",resultStr);
     
 }
+
+// HMac 是密钥相关的哈希算法。
+/**
+  相关的方法在CommonHMac.h 这个头文件里面
+ 
+ */
+void HMac_MD5(NSData *data,NSString *key)
+{
+    
+    unsigned char resulet[CC_MD5_DIGEST_LENGTH];
+    
+    
+    
+    CCHmac(kCCHmacAlgMD5, key.UTF8String, (size_t)key.length, data.bytes, (size_t)data.length, resulet);
+    
+    
+    NSString *resultStr = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",resulet[0],resulet[1],resulet[2],resulet[3],resulet[4],resulet[5],resulet[6],resulet[7],resulet[8],resulet[9],resulet[10],resulet[11],resulet[12],resulet[13],resulet[14],resulet[15]];
+    
+    NSLog(@"===HMac_MD5===%@======",resultStr);
+    
+}
+
+//第二种Hmac 的方法
+void HMac_MD5_2(NSData *data,NSString *key)
+{
+ 
+    
+    
+   unsigned char resulet[CC_MD5_DIGEST_LENGTH];
+    
+    
+    
+    CCHmacContext contex;
+    
+    CCHmacInit(&contex, kCCHmacAlgMD5, key.UTF8String, (size_t)key.length);
+    
+    CCHmacUpdate(&contex, data.bytes, (size_t)data.length);
+    
+    CCHmacFinal(&contex, resulet);
+    
+    
+    NSString *resultStr = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",resulet[0],resulet[1],resulet[2],resulet[3],resulet[4],resulet[5],resulet[6],resulet[7],resulet[8],resulet[9],resulet[10],resulet[11],resulet[12],resulet[13],resulet[14],resulet[15]];
+    
+    NSLog(@"===HMac_MD5_2===%@======",resultStr);
+
+    
+}
+
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
@@ -65,6 +114,11 @@ int main(int argc, const char * argv[]) {
         MD_2(data);
         
         MD_2fen(data);
+        
+        HMac_MD5(data, @"123");
+        HMac_MD5_2(data, @"123");
+        
+        
     }
     return 0;
 }
